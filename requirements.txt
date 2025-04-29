@@ -1,0 +1,6 @@
+numpy
+pycurl
+PyQt5
+pynput
+scipy
+sounddevice 

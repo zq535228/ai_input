@@ -1,0 +1,14 @@
+pip install -r requirements.txt
+
+rm -rf build dist
+
+python3 setup.py py2app
+
+pyinstaller --onefile main.py --icon src/voice-input.png --add-data "src/voice-input.png:."
+
+pyinstaller --name "检验大叔AI语音输入法" --onefile main.py --icon src/voice-input.icns --add-data "src/voice-input.png:."
+
+pyinstaller --name "检验大叔AI语音输入法" --windowed main.py --icon src/voice-input.icns --add-data "src/voice-input.png:."
+
+
+
