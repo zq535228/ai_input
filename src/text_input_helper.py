@@ -4,12 +4,12 @@ from pynput import keyboard
 
 class TextInputHelper:
     @staticmethod
-    def type_text(text, clipboard, keyboard_controller, append_log):
+    def type_text(text, clipboard, keyboard_controller, append_log, auto_send=False):
         """使用剪贴板进行文本输入"""
         append_log(f"使用剪贴板进行文本输入: {text}")
         try:
             # 使用剪贴板输入文本
-            success = TextInputHelper.paste_text_windows(text, clipboard, keyboard_controller, append_log)
+            success = TextInputHelper.paste_text_windows(text, clipboard, keyboard_controller, append_log, auto_send)
             if not success:
                 raise Exception("文本输入失败")
             append_log("文本输入完成")
@@ -18,7 +18,7 @@ class TextInputHelper:
             print(f"识别结果: {text}")
 
     @staticmethod
-    def paste_text_windows(text, clipboard, keyboard_controller, append_log):
+    def paste_text_windows(text, clipboard, keyboard_controller, append_log, auto_send=False):
         """使用剪贴板和快捷键模拟文本输入"""
         try:
             append_log(f"准备输入文本: {text}")
@@ -36,6 +36,13 @@ class TextInputHelper:
                     keyboard_controller.tap('v')
                 append_log("Windows/Linux粘贴操作完成: " + text)
             QThread.msleep(50)  # 给一点时间让粘贴操作完成
+            
+            # 如果启用了自动发送，模拟按下回车键
+            if auto_send:
+                QThread.msleep(50)  # 给一点额外时间确保文本已经粘贴完成
+                keyboard_controller.tap(keyboard.Key.enter)
+                append_log("自动发送：已按下回车键")
+            
             return True
         except Exception as e:
             append_log(f"文本输入失败: {str(e)}")

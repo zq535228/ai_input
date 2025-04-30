@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QTextEdit, QVBoxLayout, QWidget, QSystemTrayIcon, QMenu, QAction
+from PyQt5.QtWidgets import QApplication, QTextEdit, QVBoxLayout, QWidget, QSystemTrayIcon, QMenu, QAction, QCheckBox
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from pynput import keyboard
 from src.speech_recognizer_thread import SpeechRecognizerThread
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 def resource_path(relative_path):
     if hasattr(sys, '_MEIPASS'):
         return os.path.join(sys._MEIPASS, relative_path)
-    return os.path.join(os.path.abspath("."), relative_path)
+    return os.path.join(os.path.abspath(".")+"/src/", relative_path)
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -32,9 +32,14 @@ class MainWindow(QWidget):
         self.textarea = QTextEdit(self)
         self.textarea.setReadOnly(True)
         self.textarea.setText('欢迎使用语音识别与录音工具！\n按住 Option (⌥) 键开始录音，松开后自动识别输入。')
+        
+        # 添加自动发送复选框
+        self.auto_send_checkbox = QCheckBox('自动发送', self)
+        
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
+        layout.addWidget(self.auto_send_checkbox)
         layout.addWidget(self.textarea)
         self.setLayout(layout)
 
@@ -124,7 +129,8 @@ class MainWindow(QWidget):
             text, 
             QApplication.clipboard(), 
             self.keyboard_controller, 
-            self.append_log
+            self.append_log,
+            self.auto_send_checkbox.isChecked()
         )
 
     def audio_callback(self, indata, frames, time_info, status):

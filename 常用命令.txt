@@ -10,5 +10,8 @@ pyinstaller --name "检验大叔AI语音输入法" --onefile main.py --icon src/
 
 pyinstaller --name "检验大叔AI语音输入法" --windowed main.py --icon src/voice-input.icns --add-data "src/voice-input.png:."
 
+// 生成独立的cmd运行程序。
+pyinstaller --name "检验大叔AI语音输入法" --onefile main.py --icon src/voice-input.icns --add-data "src/voice-input.png:."
+
 
 
