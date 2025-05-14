@@ -14,6 +14,7 @@ from src.text_input_helper import TextInputHelper
 from src.key_listener_thread import KeyListenerThread
 from PyQt5.QtGui import QIcon
 import os
+import tempfile
 
 
 logger = logging.getLogger(__name__)
@@ -28,7 +29,7 @@ class MainWindow(QWidget):
         super().__init__()
         self.setWindowTitle('检验大叔AI语音输入')
         self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.WindowCloseButtonHint)
-        self.setWindowOpacity(0.8)
+        # self.setWindowOpacity(0.8)
         self.textarea = QTextEdit(self)
         self.textarea.setReadOnly(True)
         self.textarea.setText('欢迎使用语音识别与录音工具！\n按住 Option (⌥) 键开始录音，松开后自动识别输入。')
@@ -81,8 +82,8 @@ class MainWindow(QWidget):
         self.textarea.append(text)
 
     def on_option_pressed(self):
-        self.append_log('Option (⌥) 键已按下')
-        self.append_log(f'任务开始执行')
+        self.append_log('Option (⌥) 键已按下，开始录音...')
+        # self.append_log(f'任务开始执行')
         # 录音开始
         self.is_recording = True
         self.recording = []
@@ -90,35 +91,40 @@ class MainWindow(QWidget):
         self.stream.start()
 
     def on_option_released(self):
-        filename = None
-        self.append_log('Option (⌥) 键已释放')
-        # 录音结束
-        if self.is_recording:
-            self.is_recording = False
-            self.stream.stop()
-            self.stream.close()
-            if len(self.recording) > 0:
-                audio_data = np.concatenate(self.recording, axis=0)
-                filename = f"record_{int(time.time())}.wav"
-                write(filename, self.fs, audio_data)
-                self.append_log(f'录音已保存: {filename}')
+        try:
+            filename = None
+            self.append_log('Option (⌥) 键已释放，结束录音...')
+            # 录音结束
+            if self.is_recording:
+                self.is_recording = False
+                self.stream.stop()
+                self.stream.close()
+                if len(self.recording) > 0:
+                    audio_data = np.concatenate(self.recording, axis=0)
+                    # 保存到临时目录
+                    filename = os.path.join(tempfile.gettempdir(), f"record_{int(time.time())}.wav")
+                    write(filename, self.fs, audio_data)
+                else:
+                    self.append_log('未检测到录音数据')
+            if self.speech_recognizer is not None and self.speech_recognizer.isRunning():
+                self.speech_recognizer.stop()
+                self.speech_recognizer.wait()  # 等待上一个线程安全退出
+            if filename is not None:
+                self.speech_recognizer = SpeechRecognizerThread(filename)
+                self.speech_recognizer.textRecognized.connect(self.on_task_finished)
+                self.speech_recognizer.errorOccurred.connect(self.on_error)
+                self.speech_recognizer.message.connect(self.append_log)
+                self.speech_recognizer.start()
+                self.append_log(f'声音识别执行中...')
             else:
-                self.append_log('未检测到录音数据')
-        if self.speech_recognizer is not None and self.speech_recognizer.isRunning():
-            self.speech_recognizer.stop()
-            self.speech_recognizer.wait()  # 等待上一个线程安全退出
-        if filename is not None:
-            self.speech_recognizer = SpeechRecognizerThread(filename)
-            self.speech_recognizer.textRecognized.connect(self.on_task_finished)
-            self.speech_recognizer.errorOccurred.connect(self.on_error)
-            self.speech_recognizer.start()
-            self.append_log(f'{self.speech_recognizer.filename} 执行中')
-        else:
-            self.append_log(f'没有录音文件, 无法执行任务')
+                self.append_log(f'没有录音文件, 无法执行任务')
+        except Exception as e:
+            import traceback
+            self.append_log(f'崩溃异常: {e}\n{traceback.format_exc()}')
 
     def on_task_finished(self, name):
-        self.append_log(f'{name} 任务处理完成')
-        QTimer.singleShot(500, lambda: self.append_log(f'{name} 任务处理完成'))
+        # self.append_log(f'{name} 任务处理完成')
+        QTimer.singleShot(500, lambda: self.append_log(f'{time.strftime("%Y-%m-%d %H:%M:%S")}: {name}'))
         self.type_text(name)
 
     def on_error(self, error):

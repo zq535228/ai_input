@@ -5,6 +5,6 @@ from PyQt5.QtWidgets import QApplication
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = MainWindow()
-    window.resize(300, 150)
-    # window.show()  # 启动时不显示主窗口
+    window.resize(500, 200)
+    window.show()  # 启动时不显示主窗口
     sys.exit(app.exec_()) 

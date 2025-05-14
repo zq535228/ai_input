@@ -7,6 +7,7 @@ import os
 logger = logging.getLogger(__name__)
 
 class SpeechRecognizerThread(QThread):
+    message = pyqtSignal(str)
     textRecognized = pyqtSignal(str)
     errorOccurred = pyqtSignal(str)
 
@@ -29,23 +30,24 @@ class SpeechRecognizerThread(QThread):
             c.setopt(c.HTTPHEADER, [f"Authorization: Bearer {self.api_key}"])
             c.setopt(c.HTTPPOST, [("file", (c.FORM_FILE, self.filename))])
             c.perform()
+            # 获取响应状态码
             response_code = c.getinfo(c.RESPONSE_CODE)
+            # 获取响应内容
             response_body = buffer.getvalue().decode('utf-8')
-            logger.debug(f"API响应状态码: {response_code}")
-            logger.debug(f"API响应内容: {response_body}")
 
             if response_code == 200:
                 result = json.loads(response_body)
                 if result.get('code') == 0 and 'data' in result:
                     self.textRecognized.emit(result['data']['text'])
                     # 删除文件
-                    os.remove(self.filename)
+                    self.message.emit(f"声音文件: {self.filename}")
+                    # os.remove(self.filename)
                 else:
-                    self._emit_error(f"API返回错误: {result.get('msg', '未知错误')}")
+                    self.message.emit(f"API返回错误: {result.get('msg', '未知错误')}")
             else:
-                self._emit_error(f"API调用失败: {response_code}")
+                self.message.emit(f"API调用失败: {response_code}")
         except Exception as e:
-            self._emit_error(f"识别线程发生错误: {str(e)}")
+            self.message.emit(f"识别线程发生错误: {str(e)}")
         finally:
             c.close()
 
