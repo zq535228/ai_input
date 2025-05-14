@@ -13,5 +13,14 @@ pyinstaller --name "检验大叔AI语音输入法" --windowed main.py --icon src
 // 生成独立的cmd运行程序。
 pyinstaller --name "检验大叔AI语音输入法" --onefile main.py --icon src/voice-input.icns --add-data "src/voice-input.png:."
 
+libqcocoa 路径
+/Users/Zhuanz/reps/ai_input/venv/lib/python3.13/site-packages/PyQt5/Qt5/plugins/platforms/libqcocoa.dylib
 
 
+mkdir -p /Users/Zhuanz/reps/ai_input/dist/platforms
+cp /Users/Zhuanz/reps/ai_input/venv/lib/python3.13/site-packages/PyQt5/Qt5/plugins/platforms/libqcocoa.dylib /Users/Zhuanz/reps/ai_input/dist/platforms/
+
+
+pyinstaller --onefile --windowed --add-binary "/Users/Zhuanz/reps/ai_input/venv/lib/python3.13/site-packages/PyQt5/Qt5/plugins/platforms/libqcocoa.dylib:platforms" main.py
+
+/opt/homebrew/opt/python@3.10 -m venv venv310
