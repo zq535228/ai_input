@@ -8,7 +8,7 @@ pyinstaller --onefile main.py --icon src/voice-input.png --add-data "src/voice-i
 
 pyinstaller --name "检验大叔AI语音输入法" --onefile main.py --icon src/voice-input.icns --add-data "src/voice-input.png:."
 
-pyinstaller --name "检验大叔AI语音输入法" --windowed main.py --icon src/voice-input.icns --add-data "src/voice-input.png:."
+pyinstaller --name "检验大叔AI语音输入法" --windowed main.py --plist=Info.plist --icon src/voice-input.icns --add-data "src/voice-input.png:."
 
 // 生成独立的cmd运行程序。
 pyinstaller --name "检验大叔AI语音输入法" --onefile main.py --icon src/voice-input.icns --add-data "src/voice-input.png:."
@@ -24,3 +24,5 @@ cp /Users/Zhuanz/reps/ai_input/venv/lib/python3.13/site-packages/PyQt5/Qt5/plugi
 pyinstaller --onefile --windowed --add-binary "/Users/Zhuanz/reps/ai_input/venv/lib/python3.13/site-packages/PyQt5/Qt5/plugins/platforms/libqcocoa.dylib:platforms" main.py
 
 /opt/homebrew/opt/python@3.10 -m venv venv310
+
+codesign --force --deep --sign - /Applications/检验大叔AI语音输入法.app

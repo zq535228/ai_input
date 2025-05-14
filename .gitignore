@@ -4,3 +4,7 @@
 /dist
 /venv
 record_*.wav
+**/*.pyc
+
+src/__pycache__
+/venv310
